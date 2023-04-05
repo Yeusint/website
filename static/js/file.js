@@ -24,7 +24,7 @@ function sub(){
         xhr.addEventListener('load', function(ev){
             alert(ev.target.responseText);
         }, false);
-        xhr.open('POST', '/upload');
+        xhr.open('POST', '/cloud/upload');
         xhr.send(fd);
     }else{
         alert('未选择文件！');

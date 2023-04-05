@@ -1,17 +1,13 @@
 import werkzeug.exceptions
 from flask import Flask, request, make_response, url_for, redirect
 from os.path import join
-from os import listdir
 from bin import md5
 from time import time
 from json import loads, dumps
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'file/'
-#r'F:/OneDrive/qlcbs2022China/Jiang_James/OneDrive - qlcbs2022china/web_file'
-files={}
-for i in listdir(app.config['UPLOAD_FOLDER']):
-    files[md5(i)]=i
+app.config['UPLOAD_FOLDER'] = 'F:/OneDrive/qlcbs2022China/Jiang_James/OneDrive - qlcbs2022china/web_file'
+
 
 
 @app.route('/')
@@ -27,22 +23,33 @@ def b(p):
         return app.send_static_file('404.html')
 
 
-@app.route('/cloud/upload', methods=['POST'])
+@app.route('/cloud/upload', methods=['POST', 'GET'])
 def upload():
-    f = request.files['a']
-    f.save(join(app.config['UPLOAD_FOLDER'], f.filename))
-    return f'成功上传文件{f.filename}'
+    try:
+        c = loads(open('data.json').read())
+        if request.cookies['user'] in c['users']:
+            if request.method == 'GET':
+                 return app.send_static_file('upload.html')
+            else:
+                f = request.files['a']
+                f.save(join(app.config['UPLOAD_FOLDER'], f.filename))
+                c['users'][request.cookies['user']][1][md5(f.filename)] = f.filename
+                open('data.json', 'w').write(dumps(c))
+                return f'success upload!\nfile name:{f.filename}\nmd5:{md5(f.name)}'
+        else:
+            return redirect('/cloud/ua')
+    except:
+        return redirect('/cloud/ua')
 
 
-@app.route('/cloud')
+@app.route('/cloud/')
 def dir():
     try:
         if request.cookies['user'] in loads(open('data.json').read())['users']:
             r = ''
-            for i in listdir(app.config['UPLOAD_FOLDER']):
-                files[md5(i)]=i
-            for i in listdir(app.config['UPLOAD_FOLDER']):
-                r += f"<a href='/dl?sign={md5(i)}'>{i}</a><br>"
+            d = loads(open('data.json').read())['users'][request.cookies['user']][1]
+            for i in d:
+                r += f"<a href='/cloud/dl?sign={i}'>{d[i]}</a><br>"
             return r
         else:
             return redirect('/cloud/ua')
@@ -52,7 +59,15 @@ def dir():
 
 @app.route('/cloud/dl', methods=['GET'])
 def dl():
-    return redirect(url_for('test', name=files[request.args['sign']], sign=md5(int(time()))))
+    try:
+        d = loads(open('data.json').read())['users']
+        if request.cookies['user'] in d:
+            if request.args['sign'] in d[request.cookies['user']][1]:
+                return redirect(url_for('test', name=d[request.cookies['user']][1][request.args['sign']], sign=md5(int(time()))))
+            else:
+                return "error:You don't have this file!"
+    finally:
+        redirect('/cloud/ua')
 
 
 @app.route('/cloud/dl/<sign>/<name>')
@@ -77,16 +92,23 @@ def ua():
     else:
         d =loads(request.data)
         print(d)
-        u = loads(open('data.json').read())['users']
+        u = loads(open('data.json').read())
         if d['type'] == 'login':
-            if d['user'] in u and d['pwd']==u[d['user']]:
+            if d['user'] in u['users'] and d['pwd']==u['users'][d['user']][0]:
                 r = make_response('login success')
-                r.set_cookie('user',d['user'])
+                r.set_cookie('user',d['user'],expires=int(time())+174800)
                 return r
             else:
                 return 'user or password error'
+        elif d['type'] == 'reg':
+            if d['user'] in u['users']:
+                return 'had same user'
+            else:
+                u['users'][d['user']]=[d['pwd'], {}]
+                open('data.json', 'w').write(dumps(u))
+                return 'success register'
         else:
-            return 'error'
+            return 'type error'
 
 
 app.run("0.0.0.0", 80)
