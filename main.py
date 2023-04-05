@@ -6,7 +6,7 @@ from time import time
 from json import loads, dumps
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'F:/OneDrive/qlcbs2022China/Jiang_James/OneDrive - qlcbs2022china/web_file'
+app.config['UPLOAD_FOLDER'] = 'file/'
 
 
 

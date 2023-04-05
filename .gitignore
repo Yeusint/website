@@ -1,3 +1,4 @@
-/file/*
-/.idea/*
-/bin/__pycache__/*
+file/
+.idea/
+bin/__pycache__/
+*.json
