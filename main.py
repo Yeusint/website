@@ -35,7 +35,7 @@ def upload():
                 f.save(join(app.config['UPLOAD_FOLDER'], f.filename))
                 c['users'][request.cookies['user']][1][md5(f.filename)] = f.filename
                 open('data.json', 'w').write(dumps(c))
-                return f'success upload!\nfile name:{f.filename}\nmd5:{md5(f.name)}'
+                return f'success upload!\nfile name:{f.filename}\nmd5:{md5(f.filename)}'
         else:
             return redirect('/cloud/ua')
     except:
