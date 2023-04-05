@@ -11,10 +11,12 @@ if(f){
 }
 }
 function sub(){
-    f = document.getElementById('m').files[0];
+    f = document.getElementById('m').files;
     if(f){
         fd = new FormData();
-        fd.append('a', f);
+        for (i=0;i<f.length;i++){
+            fd.append(i.toString(), f[i]);
+        }
         xhr = new XMLHttpRequest();
         xhr.upload.addEventListener('progress', function(ev){
             if(ev.lengthComputable){

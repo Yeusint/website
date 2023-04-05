@@ -1,5 +1,5 @@
 import werkzeug.exceptions
-from flask import Flask, request, make_response, url_for, redirect
+from flask import Flask, request, make_response, url_for, redirect, render_template
 from os.path import join
 from bin import md5
 from time import time
@@ -17,43 +17,41 @@ def a():
 
 @app.route('/<path:p>')
 def b(p):
-    try:
-        return app.send_static_file(p)
-    except werkzeug.exceptions.NotFound:
-        return app.send_static_file('404.html')
+    return app.send_static_file(p)
 
 
 @app.route('/cloud/upload', methods=['POST', 'GET'])
 def upload():
-    try:
+    #try:
         c = loads(open('data.json').read())
         if request.cookies['user'] in c['users']:
             if request.method == 'GET':
                  return app.send_static_file('upload.html')
             else:
-                f = request.files['a']
-                f.save(join(app.config['UPLOAD_FOLDER'], f.filename))
-                c['users'][request.cookies['user']][1][md5(f.filename)] = f.filename
+                n = {'0':'','1':''}
+                f = request.files
+                for i in f:
+                    f[i].save(join(app.config['UPLOAD_FOLDER'], f[i].filename))
+                    c['users'][request.cookies['user']][1][md5(f[i].filename)] = f[i].filename
+                    n['0'] += f'{md5(f[i].filename)},\n'
+                    n['1'] += f'{f[i].filename},\n'
                 open('data.json', 'w').write(dumps(c))
-                return f'success upload!\nfile name:{f.filename}\nmd5:{md5(f.filename)}'
+                return f'success upload!\nfile name:{n["1"]}md5:{n["0"]}'
         else:
             return redirect('/cloud/ua')
-    except:
-        return redirect('/cloud/ua')
+    #except KeyError:
+        #return redirect('/cloud/ua')
 
 
 @app.route('/cloud/')
 def dir():
     try:
         if request.cookies['user'] in loads(open('data.json').read())['users']:
-            r = ''
             d = loads(open('data.json').read())['users'][request.cookies['user']][1]
-            for i in d:
-                r += f"<a href='/cloud/dl?sign={i}'>{d[i]}</a><br>"
-            return r
+            return render_template('files.htm', result=d)
         else:
             return redirect('/cloud/ua')
-    except:
+    except KeyError:
         return redirect('/cloud/ua')
 
 
@@ -71,7 +69,7 @@ def dl():
 
 
 @app.route('/cloud/dl/<sign>/<name>')
-def test(name, sign):
+def dl2(name, sign):
     if md5(int(time())) == sign:
         r = make_response(open(f'file/{name}', 'rb').read())
         r.headers['Content-Type'] = 'byte/file'
@@ -109,6 +107,25 @@ def ua():
                 return 'success register'
         else:
             return 'type error'
+
+
+@app.errorhandler(404)
+def _404(error):
+    return f"<h1 style='color: red;text-align:center'>这里什么也没有,你来错了-v-</h1>"
+
+
+@app.errorhandler(500)
+def _500(error):
+    return f"<h1 style='color: red;text-align:center'>哦豁,屑程序员的代码有bug!!!</h1>"
+
+@app.errorhandler(403)
+def _403(error):
+    return f"<h1 style='color: red;text-align:center'>你的权限跑哪去了?等你的权限拿到再来看看我吧...</h1>"
+
+
+@app.errorhandler(400)
+def _400(error):
+    return f"<h1 style='color: red;text-align:center'>哦豁,屑程序员的代码有bug!!!</h1>"
 
 
 app.run("0.0.0.0", 80)

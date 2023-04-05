@@ -1,3 +1,13 @@
-import time
-t = time.time() + 86400*2
-print(time.strftime('%m月%d天%H时%M分%S秒', time.localtime(t)))
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def a():
+    return '你干嘛~'
+    
+@app.errorhandler(404)
+def b(error):
+    return '你知不知道404是什么东西?'
+
+app.run(debug=True)

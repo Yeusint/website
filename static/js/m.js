@@ -8,6 +8,7 @@ function login(){
     }else{
         send_data('/cloud/ua', 'POST', true, {'type':'login','user':u,'pwd':p},function(ev){
             alert(ev);
+            location.reload();
         });
     }
 }
