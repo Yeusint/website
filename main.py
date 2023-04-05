@@ -6,7 +6,7 @@ from time import time
 from json import loads, dumps
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'file/'
+app.config['UPLOAD_FOLDER'] = 'F:\OneDrive\qlcbs2022China\Jiang_James\OneDrive - qlcbs2022china\web_file'
 
 
 
@@ -22,7 +22,7 @@ def b(p):
 
 @app.route('/cloud/upload', methods=['POST', 'GET'])
 def upload():
-    #try:
+    try:
         c = loads(open('data.json').read())
         if request.cookies['user'] in c['users']:
             if request.method == 'GET':
@@ -39,8 +39,8 @@ def upload():
                 return f'success upload!\nfile name:{n["1"]}md5:{n["0"]}'
         else:
             return redirect('/cloud/ua')
-    #except KeyError:
-        #return redirect('/cloud/ua')
+    except KeyError:
+        return redirect('/cloud/ua')
 
 
 @app.route('/cloud/')
