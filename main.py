@@ -84,9 +84,9 @@ def ua():
             if request.cookies['user'] in loads(open('data.json').read())['users']:
                 return redirect('/cloud')
             else:
-                return app.send_static_file('l.htm')
+                return app.send_static_file('ua.htm')
         except:
-            return app.send_static_file('l.htm')
+            return app.send_static_file('ua.htm')
     else:
         d =loads(request.data)
         print(d)
