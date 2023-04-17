@@ -2,3 +2,4 @@ file/
 .idea/
 bin/__pycache__/
 *.json
+static/test1.html
