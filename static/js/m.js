@@ -6,7 +6,7 @@ function login(){
     }else if(p ===''){
         alert('请输入密码');
     }else{
-        send_data('/cloud/ua', 'POST', true, {'type':'login','user':u,'pwd':p},function(ev){
+        send_data('/api/ua', 'POST', true, {'type':'login','id':u,'pwd':p},function(ev){
             alert(ev);
             location.reload();
         });
@@ -22,7 +22,7 @@ function reg(){
     }else if(p != document.getElementById('rep').value){
         alert('密码不一致');
     }else{
-        send_data('/cloud/ua', 'POST', true, {'type':'reg','user':u,'pwd':p},function(ev){
+        send_data('/api/ua', 'POST', true, {'type':'reg','name':u,'pwd':p},function(ev){
             alert(ev);
         });
     }
