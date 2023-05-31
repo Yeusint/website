@@ -1,11 +1,10 @@
 from flask import (
     Flask,
+    abort,
     request,
     make_response,
+    send_from_directory,
     url_for,
-    redirect,
-    render_template,
-    session,
 )
 from bin import file
 import os, json
@@ -27,10 +26,20 @@ userfile = file.file(PATH)
 def a():return app.send_static_file("index.html")
 
 
-@app.route("/api/listdir", methods=["POST"])  # 以json返回文件夹下的所有文件，需要传入文件地址相对值
+@app.route("/api/listdir", methods=["POST"])  # 以json返回文件夹下的所有文件，需要传入文件夹地址相对值
 @limiter.limit("2/second")
 def listdir():return userfile.listdir(str(request.data))
 
+
+@app.route("/api/file/download/<PATH:file_name>", methods=["GET"])  # 下载file文件夹下的文件，只需提供文件地址相对值即可
+@limiter.limit("1/second")
+def cloudDownload(file_name):
+    try:
+        response = make_response(send_from_directory(PATH, file_name, as_attachment=True))
+        return response
+    except Exception as e:
+        abort(404)
+    
 
 @app.route("/cloud/")
 def name():#返回网盘的页面，一切显示文件夹的任务，都有前端直接访问后端接口完成，此接口只负责返回网页，别改我的代码！
