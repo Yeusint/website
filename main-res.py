@@ -26,11 +26,12 @@ userfile = file.file(PATH)
 def a():return app.send_static_file("index.html")
 
 
-@app.route("/api/listdir", methods=["POST"])  # 以json返回文件夹下的所有文件，需要传入文件地址相对值
+@app.route("/api/listdir", methods=["POST"])  # 以json返回文件夹下的所有文件，需要传入文件夹地址相对值
 @limiter.limit("2/second")
 def listdir():return userfile.listdir(str(request.data))
 
-@app.route("/api/file/download/<PATH:file_name>", methods=["GET"])  # 下载file文件夹下的文件，只需提供相对值即可
+
+@app.route("/api/file/download/<PATH:file_name>", methods=["GET"])  # 下载file文件夹下的文件，只需提供文件地址相对值即可
 @limiter.limit("1/second")
 def cloudDownload(file_name):
     try:
